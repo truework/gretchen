@@ -27,10 +27,7 @@
   },
   "homepage": "https://github.com/truework/gretchen#readme",
   "devDependencies": {
-    "abort-controller": "^3.0.0",
     "ava": "^2.4.0",
-    "body-parser": "^1.19.0",
-    "connect": "^3.7.0",
     "microbundle": "^0.11.0",
     "node-fetch": "^2.6.0",
     "ts-node": "^8.4.1"
