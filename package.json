@@ -14,7 +14,7 @@
     "build": "microbundle build",
     "watch": "microbundle watch",
     "publish": "npm publish",
-    "test": "ava test.ts"
+    "test": "ava tests/**.test.ts --verbose"
   },
   "repository": {
     "type": "git",

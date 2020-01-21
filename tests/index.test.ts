@@ -5,150 +5,9 @@ import test from "ava";
 // @ts-ignore
 global.fetch = fetch;
 
-import * as gretch from "./index";
+import * as gretch from "../index";
 
-test("handleRetry: retry works", async t => {
-  let i = 0;
-  const server = createServer((req, res) => {
-    if (i++ < 2) {
-      res.writeHead(500);
-      res.end();
-    } else {
-      res.end("ha");
-    }
-  });
-
-  await new Promise(r => {
-    server.listen(async () => {
-      // @ts-ignore
-      const { port } = server.address();
-
-      const raw = await gretch.handleRetry(() =>
-        gretch.fetcher(`http://127.0.0.1:${port}`)
-      );
-      const res = await raw.text();
-
-      t.is(res, "ha");
-
-      server.close();
-
-      r();
-    });
-  });
-});
-
-test("handleRetry: retries fail", async t => {
-  let i = 0;
-  const server = createServer((req, res) => {
-    if (i++ < 2) {
-      res.writeHead(500);
-      res.end();
-    } else {
-      res.end("ha");
-    }
-  });
-
-  await new Promise(r => {
-    server.listen(async () => {
-      // @ts-ignore
-      const { port } = server.address();
-
-      const raw = await gretch.handleRetry(
-        () => gretch.fetcher(`http://127.0.0.1:${port}`),
-        1
-      );
-      t.is(raw.status, 500);
-
-      server.close();
-
-      r();
-    });
-  });
-});
-
-test("handleTimeout: will timeout", async t => {
-  const server = createServer((req, res) => {
-    setTimeout(() => {
-      res.end("ha");
-    }, 1000);
-  });
-
-  await new Promise(r => {
-    server.listen(async () => {
-      // @ts-ignore
-      const { port } = server.address();
-
-      try {
-        await gretch.handleTimeout(
-          gretch.fetcher(`http://127.0.0.1:${port}`),
-          500
-        );
-      } catch (e) {
-        t.is(e.name, "HTTPTimeout");
-      }
-
-      server.close();
-
-      r();
-    });
-  });
-});
-
-test("handleTimeout: won't timeout", async t => {
-  const server = createServer((req, res) => {
-    setTimeout(() => {
-      res.end("ha");
-    }, 1000);
-  });
-
-  await new Promise(r => {
-    server.listen(async () => {
-      // @ts-ignore
-      const { port } = server.address();
-
-      const raw = await gretch.handleTimeout(
-        gretch.fetcher(`http://127.0.0.1:${port}`)
-      );
-      const res = await raw.text();
-
-      t.is(res, "ha");
-
-      server.close();
-
-      r();
-    });
-  });
-});
-
-test("handleRetry(handleTimeout): timeout", async t => {
-  const server = createServer((req, res) => {
-    setTimeout(() => {
-      res.end("ha");
-    }, 1000);
-  });
-
-  await new Promise(r => {
-    server.listen(async () => {
-      // @ts-ignore
-      const { port } = server.address();
-
-      const request = () =>
-        gretch.handleTimeout(gretch.fetcher(`http://127.0.0.1:${port}`), 500);
-
-      try {
-        await gretch.handleRetry(request);
-      } catch (e) {
-        t.is(e.name, "HTTPTimeout");
-      }
-
-      server.close();
-
-      r();
-    });
-  });
-});
-
-test("gretch: successful requesst", async t => {
+test("successful request", async t => {
   const server = createServer((req, res) => {
     res.end("ha");
   });
@@ -171,7 +30,7 @@ test("gretch: successful requesst", async t => {
   });
 });
 
-test("gretch: retry request", async t => {
+test("retry request", async t => {
   let i = 0;
   const server = createServer((req, res) => {
     if (i++ < 2) {
@@ -200,7 +59,7 @@ test("gretch: retry request", async t => {
   });
 });
 
-test("gretch: retry fails, returns generic error", async t => {
+test("retry fails, returns generic error", async t => {
   let i = 0;
   const server = createServer((req, res) => {
     if (i++ < 2) {
@@ -218,7 +77,9 @@ test("gretch: retry fails, returns generic error", async t => {
 
       const res = await gretch
         .gretch(`http://127.0.0.1:${port}`, {
-          retry: 1
+          retry: {
+            attempts: 1,
+          },
         })
         .text();
 
@@ -231,7 +92,7 @@ test("gretch: retry fails, returns generic error", async t => {
   });
 });
 
-test("gretch: request timeout, returns generic error", async t => {
+test("request timeout, returns generic error", async t => {
   const server = createServer((req, res) => {
     setTimeout(() => {
       res.end("ha");
@@ -258,7 +119,7 @@ test("gretch: request timeout, returns generic error", async t => {
   });
 });
 
-test("gretch: json posts", async t => {
+test("json posts", async t => {
   const server = createServer((req, res) => {
     const data = [];
     req.on("data", chunk => data.push(chunk));
@@ -292,7 +153,7 @@ test("gretch: json posts", async t => {
   });
 });
 
-test("gretch: returns server error", async t => {
+test("returns server error", async t => {
   const server = createServer((req, res) => {
     res.writeHead(500);
     res.end(JSON.stringify({ message: "foo" }));
@@ -316,7 +177,7 @@ test("gretch: returns server error", async t => {
   });
 });
 
-test("gretch: returns data as error", async t => {
+test("returns data as error", async t => {
   const server = createServer((req, res) => {
     res.writeHead(400, {
       'Content-Type': 'application/json',

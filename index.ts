@@ -15,9 +15,16 @@ export type GretchResponse<T = APIResponse, A = APIError> =
       data: T;
     };
 
+export type RetryOpts = {
+  attempts?: number;
+  codes?: number[];
+  methods?: string[];
+  delay?: number;
+};
+
 export type RequestOpts = {
   json?: { [key: string]: any };
-  retry?: number | boolean;
+  retry?: RetryOpts | boolean;
   timeout?: number;
   [key: string]: any;
 };
@@ -45,6 +52,13 @@ const global = global || {};
 if (typeof AbortController === "function") {
   global.AbortController = AbortController;
 }
+
+const defaultRetryOptions: RetryOpts = {
+  attempts: 2,
+  codes: [408, 413, 429],
+  methods: ["GET"],
+  delay: 6
+};
 
 class HTTPError extends Error {
   constructor(response: Response) {
@@ -77,20 +91,36 @@ export async function fetcher(
 
 export async function handleRetry(
   request: () => Promise<Response>,
-  times = 2,
-  delay = 6
+  method: string,
+  retryOptions: Partial<RetryOpts>
 ) {
   const res = await request();
+  const { status } = res;
 
-  if (!res.ok) {
-    if (times === 0 || res instanceof HTTPTimeout) {
+  const { attempts, codes, methods, delay } = {
+    ...defaultRetryOptions,
+    ...retryOptions
+  };
+
+  const codesMatch =
+    codes.indexOf(status) > -1 || (status >= 500 && status < 600);
+  const methodsMatch = methods.indexOf(method) > -1;
+
+  if (codesMatch && methodsMatch) {
+    if (attempts === 0 || res instanceof HTTPTimeout) {
       return res;
     }
 
     await new Promise(r => {
       setTimeout(r, delay);
     });
-    return handleRetry(request, times - 1, delay * 6);
+
+    return handleRetry(request, method, {
+      attempts: attempts - 1,
+      codes: codes,
+      methods: methods,
+      delay: delay * delay
+    });
   }
 
   return res;
@@ -122,8 +152,17 @@ export function gretch<T = APIResponse, A = APIError>(
   url: RequestInfo,
   opts: RequestInit & RequestOpts = {}
 ): GretchInstance<T, A> {
-  const { json, retry = 2, timeout = 10000, ...rest } = opts;
-  const options: RequestInit = { ...(rest as RequestInit) };
+  const {
+    method = "GET",
+    json,
+    retry = defaultRetryOptions,
+    timeout = 10000,
+    ...rest
+  } = opts;
+  const options: RequestInit = {
+    method,
+    ...(rest as RequestInit)
+  };
   const controller = global.supportsAbort ? new global.AbortController() : null;
 
   if (controller) {
@@ -145,7 +184,9 @@ export function gretch<T = APIResponse, A = APIError>(
       : fetcher(url, options);
 
   const response =
-    retry !== false ? handleRetry(request, retry as number) : request();
+    retry === false
+      ? request()
+      : handleRetry(request, method, retry as Partial<RetryOpts>);
 
   return resolvers.reduce((methods, key) => {
     methods[key] = async () => {
