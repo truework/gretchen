@@ -20,7 +20,8 @@ export async function handleRetry(
   retryOptions: Partial<RetryOptions>
 ) {
   const res = await request();
-  const { status } = res;
+  const { status, headers } = res;
+  const retryAfter = headers.get('Retry-After');
 
   const { attempts, codes, methods, delay } = {
     ...defaultRetryOptions,
@@ -37,7 +38,7 @@ export async function handleRetry(
     }
 
     await new Promise(r => {
-      setTimeout(r, delay);
+      setTimeout(r, retryAfter ? parseInt(retryAfter, 10) * 1000 : delay);
     });
 
     return handleRetry(request, method, {

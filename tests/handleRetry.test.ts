@@ -162,3 +162,47 @@ test("works with timeout", async t => {
     });
   });
 })
+
+test("respects Retry-After header", async t => {
+  let i = 0;
+  const server = createServer((req, res) => {
+    if (i++ < 2) {
+      res.writeHead(500, {
+        'Retry-After': 1
+      });
+      res.end();
+    } else {
+      res.end("ha");
+    }
+  });
+
+  await new Promise(r => {
+    server.listen(async () => {
+      // @ts-ignore
+      const { port } = server.address();
+
+      const then = Date.now();
+
+      const raw = await handleRetry(
+        () => fetch(`http://127.0.0.1:${port}`),
+        "GET",
+        {}
+      );
+
+      const now = Date.now();
+
+      // retried too fast
+      if ((now - then) < 1000) {
+        t.fail();
+      }
+
+      const res = await raw.text();
+
+      t.is(res, 'ha');
+
+      server.close();
+
+      r();
+    });
+  });
+})
