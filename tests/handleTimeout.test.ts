@@ -1,11 +1,12 @@
 import { createServer } from "http";
-import fetch from "node-fetch";
+import nodeFetch from "node-fetch";
 import test from "ava";
 
 // @ts-ignore
-global.fetch = fetch;
+global.fetch = nodeFetch;
 
-import * as gretch from "../index";
+import fetch from '../lib/fetch';
+import { handleTimeout } from '../lib/handleTimeout';
 
 test("will timeout", async t => {
   const server = createServer((req, res) => {
@@ -20,8 +21,8 @@ test("will timeout", async t => {
       const { port } = server.address();
 
       try {
-        await gretch.handleTimeout(
-          gretch.fetcher(`http://127.0.0.1:${port}`),
+        await handleTimeout(
+          fetch(`http://127.0.0.1:${port}`),
           500
         );
       } catch (e) {
@@ -47,8 +48,8 @@ test("won't timeout", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const raw = await gretch.handleTimeout(
-        gretch.fetcher(`http://127.0.0.1:${port}`)
+      const raw = await handleTimeout(
+        fetch(`http://127.0.0.1:${port}`)
       );
       const res = await raw.text();
 

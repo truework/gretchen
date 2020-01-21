@@ -1,11 +1,11 @@
 import { createServer } from "http";
-import fetch from "node-fetch";
+import nodeFetch from "node-fetch";
 import test from "ava";
 
 // @ts-ignore
-global.fetch = fetch;
+global.fetch = nodeFetch;
 
-import * as gretch from "../index";
+import gretch from "../index";
 
 test("successful request", async t => {
   const server = createServer((req, res) => {
@@ -17,7 +17,7 @@ test("successful request", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch.gretch(`http://127.0.0.1:${port}`).text();
+      const res = await gretch(`http://127.0.0.1:${port}`).text();
 
       if (res.data) {
         t.is(res.data, "ha");
@@ -46,7 +46,7 @@ test("retry request", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch.gretch(`http://127.0.0.1:${port}`).text();
+      const res = await gretch(`http://127.0.0.1:${port}`).text();
 
       if (res.data) {
         t.is(res.data, "ha");
@@ -75,8 +75,7 @@ test("retry fails, returns generic error", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch
-        .gretch(`http://127.0.0.1:${port}`, {
+      const res = await gretch(`http://127.0.0.1:${port}`, {
           retry: {
             attempts: 1,
           },
@@ -104,8 +103,7 @@ test("request timeout, returns generic error", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch
-        .gretch(`http://127.0.0.1:${port}`, {
+      const res = await gretch(`http://127.0.0.1:${port}`, {
           timeout: 500
         })
         .text();
@@ -135,8 +133,7 @@ test("json posts", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch
-        .gretch<{ success: boolean }>(`http://127.0.0.1:${port}`, {
+      const res = await gretch<{ success: boolean }>(`http://127.0.0.1:${port}`, {
           method: "POST",
           json: {
             foo: true
@@ -164,7 +161,7 @@ test("returns server error", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch.gretch(`http://127.0.0.1:${port}`).json();
+      const res = await gretch(`http://127.0.0.1:${port}`).json();
 
       if (res.error) {
         t.is(res.error.message, "foo");
@@ -190,7 +187,7 @@ test("returns data as error", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch.gretch(`http://127.0.0.1:${port}`).json();
+      const res = await gretch(`http://127.0.0.1:${port}`).json();
 
       if (res.error) {
         t.is(res.error.message, "foo");

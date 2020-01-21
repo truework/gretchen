@@ -1,11 +1,13 @@
 import { createServer } from "http";
-import fetch from "node-fetch";
+import nodeFetch from "node-fetch";
 import test from "ava";
 
 // @ts-ignore
-global.fetch = fetch;
+global.fetch = nodeFetch;
 
-import * as gretch from "../index";
+import fetch from "../lib/fetch";
+import { handleRetry } from "../lib/handleRetry";
+import { handleTimeout } from "../lib/handleTimeout";
 
 test("works", async t => {
   let i = 0;
@@ -23,8 +25,8 @@ test("works", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const raw = await gretch.handleRetry(
-        () => gretch.fetcher(`http://127.0.0.1:${port}`),
+      const raw = await handleRetry(
+        () => fetch(`http://127.0.0.1:${port}`),
         "GET",
         {}
       );
@@ -55,8 +57,8 @@ test("retries fail", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const raw = await gretch.handleRetry(
-        () => gretch.fetcher(`http://127.0.0.1:${port}`),
+      const raw = await handleRetry(
+        () => fetch(`http://127.0.0.1:${port}`),
         "GET",
         { attempts: 1 }
       );
@@ -85,8 +87,8 @@ test("retries for specified status codes", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const raw = await gretch.handleRetry(
-        () => gretch.fetcher(`http://127.0.0.1:${port}`),
+      const raw = await handleRetry(
+        () => fetch(`http://127.0.0.1:${port}`),
         "GET",
         { codes: [ 400 ] }
       );
@@ -117,8 +119,8 @@ test("retries for specified methods", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const raw = await gretch.handleRetry(
-        () => gretch.fetcher(`http://127.0.0.1:${port}`),
+      const raw = await handleRetry(
+        () => fetch(`http://127.0.0.1:${port}`),
         "POST",
         { methods: [ "POST" ] }
       );
@@ -146,10 +148,10 @@ test("works with timeout", async t => {
       const { port } = server.address();
 
       const request = () =>
-        gretch.handleTimeout(gretch.fetcher(`http://127.0.0.1:${port}`), 500);
+        handleTimeout(fetch(`http://127.0.0.1:${port}`), 500);
 
       try {
-        await gretch.handleRetry(request, "GET", {});
+        await handleRetry(request, "GET", {});
       } catch (e) {
         t.is(e.name, "HTTPTimeout");
       }
