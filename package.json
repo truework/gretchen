@@ -1,5 +1,5 @@
 {
-  "name": "gretchen",
+  "name": "@truework/gretchen",
   "version": "0.0.1",
   "description": "Making fetch happen in Typescript.",
   "source": "index.ts",
@@ -16,6 +16,26 @@
     "publish": "npm publish",
     "test": "ava tests/**.test.ts --verbose"
   },
+  "keywords": [
+    "fetch",
+    "fetching",
+    "http",
+    "https",
+    "request",
+    "requests",
+    "get",
+    "url",
+    "ajax",
+    "api",
+    "got",
+    "axios",
+    "node-fetch",
+    "typescript",
+    "tiny",
+    "small",
+    "micro",
+    "microjs"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/truework/gretchen.git"

@@ -29,7 +29,7 @@ export type GretchOptions = {
   retry?: RetryOptions | boolean;
   timeout?: number;
   [key: string]: any;
-};
+} & RequestInit;
 
 type GretchInstance<T, A> = {
   [key: string]: () => Promise<GretchResponse<T, A>>;
@@ -44,7 +44,7 @@ if (typeof AbortController === "function") {
 
 export default function gretch<T = APIResponse, A = APIError>(
   url: RequestInfo,
-  opts: RequestInit & GretchOptions = {}
+  opts: GretchOptions = {}
 ): GretchInstance<T, A> {
   const {
     method = "GET",

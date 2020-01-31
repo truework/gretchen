@@ -1,6 +1,10 @@
 # gretchen
 
-Making fetch happen in Typescript. **1.1kb gzipped.**
+Making `fetch` happen in Typescript. **1.2kb gzipped.**
+
+> ⚠️ This is beta software, and it might not be ready for production use just
+> yet.  However, if you'd like to try it out or contribute, we'd love that and
+> we'd love to hear your thoughts.
 
 ## Features
 
@@ -9,11 +13,6 @@ Making fetch happen in Typescript. **1.1kb gzipped.**
 - **resilient:** configurable retries & timeout
 - **smart:** respects `Retry-After` header
 - **small:** won't break your bundle
-
-### Why?
-
-There are a lot of options out there for requesting data. Most modern fetch
-implementations, however, rely on throwing errors. For type-safety, we needed something that would allow us to type the response, no matter what. We also wanted to bake in a few opinions of our own, though the API should be flexible enough for most other applications.
 
 ## Install
 
@@ -31,20 +30,24 @@ import gretch from "@truework/gretchen";
 const request = gretch("/api/user/12");
 ```
 
-The request will be made immediately. To await its return and consume any response data, call one of the MIME-type handlers returned from the initial `gretch` call:
+The request will be made immediately, but to await the response and consume any
+response data, use any of the standard `fetch` [body interface
+methods](https://developer.mozilla.org/en-US/docs/Web/API/Response#Body_Interface_Methods_2):
 
 ```js
 const response = await request.json();
 ```
 
-Responses are somewhat special. In Typescript terms, they employ a _discriminated union_ to allow you to type and consume both the success and error responses returned by your API.
+Responses are somewhat special. In Typescript terms, they employ a
+_discriminated union_ to allow you to type and consume both the success and
+error responses returned by your API.
 
 In a successful response, the object will look something like this:
 
 ```js
 {
-	status: 200,
-	data: {}, // or whatever your data is
+  status: 200,
+  data: {}, // or whatever your data is
   error: undefined,
 }
 ```
@@ -53,8 +56,8 @@ And for an error response it will look something like this:
 
 ```js
 {
-	status: 400,
-	data: undefined,
+  status: 400,
+  data: undefined,
   error: {}, // an Error, or other data returned by your API
 }
 ```
@@ -63,7 +66,8 @@ And for an error response it will look something like this:
 
 `gretchen` defaults to `GET` requests, and sets `credentials` to `same-origin`.
 
-To make different types of requests, or edit headers and other request config, pass a config object:
+To make different types of requests, or edit headers and other request config,
+pass a config object:
 
 ```js
 const response = await gretch("/api/user/12", {
@@ -85,7 +89,8 @@ const response = await gretch("/api/user/12", {
 }).json();
 ```
 
-For convenience, there’s also a `json` shorthand. We’ll take care of stringifying the body:
+For convenience, there’s also a `json` shorthand. We’ll take care of
+stringifying the body:
 
 ```js
 const response = await gretch("/api/user/12", {
@@ -99,12 +104,18 @@ const response = await gretch("/api/user/12", {
 
 ### Resilience
 
-`gretchen` will automatically attempt to retry _some_ types of requests if they return certain error codes. Below are the configurable options and their defaults:
+`gretchen` will automatically attempt to retry _some_ types of requests if they
+return certain error codes. Below are the configurable options and their
+defaults:
 
 - `attempts` - a `number` of retries to attempt before failing. Defaults to `2`.
-- `codes` - an `array` or `number` status codes that indicate a retry-able request. Defaults to `[ 408, 413, 429 ]`.
-- `methods` - an `array` of `string`s indicating which request methods should be retry-able. Defaults to `[ ‘GET’ ]`.
-- `delay` - a `number` used to exponentially back-off the delay time between requests. Defaults to `6`. Example: first delay is 6ms, second 36ms, third 216ms, and so on.
+- `codes` - an `array` of `number` status codes that indicate a retry-able
+  request. Defaults to `[ 408, 413, 429 ]`.
+- `methods` - an `array` of `string`s indicating which request methods should be
+  retry-able. Defaults to `[ "GET" ]`.
+- `delay` - a `number` in milliseconds used to exponentially back-off the delay
+  time between requests. Defaults to `6`. Example: first delay is 6ms, second
+  36ms, third 216ms, and so on.
 
 These options can be set using the configuration object:
 
@@ -128,7 +139,9 @@ const response = await gretch("/api/user/12", {
 
 ## Usage with Typescript
 
-`gretchen` is written in Typescript and employs a _discriminated union_ to allow you to type and consume both the success and error responses returned by your API.
+`gretchen` is written in Typescript and employs a _discriminated union_ to allow
+you to type and consume both the success and error responses returned by your
+API.
 
 To do so, pass your data types directly to the `gretch` call:
 
@@ -162,6 +175,14 @@ if (response.error) {
 }
 ```
 
+# Why?
+
+There are a lot of options out there for requesting data. Most modern `fetch`
+implementations, however, rely on throwing errors. For type-safety, we needed
+something that would allow us to type the response, no matter what. We also
+wanted to bake in a few opinions of our own, though the API should be flexible
+enough for most other applications.
+
 # Credits
 
 This library was inspired by [ky](https://github.com/sindresorhus/ky) and
@@ -173,4 +194,4 @@ MIT License © [Truework](https://truework.com)
 
 <br />
 
-![cheap movie reference](https://user-images.githubusercontent.com/4732330/72651850-65698a00-394a-11ea-93ae-933aa5e44c47.png)
+![cheap movie reference](https://user-images.githubusercontent.com/4732330/73581652-928c6100-444f-11ea-8796-7cdc77271d06.png)
