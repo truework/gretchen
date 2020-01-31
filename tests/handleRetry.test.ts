@@ -71,6 +71,37 @@ test("retries fail", async t => {
   });
 });
 
+test("respect 0 retries config", async t => {
+  let i = 0;
+  const server = createServer((req, res) => {
+    if (i++ < 2) {
+      res.writeHead(500);
+      res.end();
+    } else {
+      res.end("ha");
+    }
+  });
+
+  await new Promise(r => {
+    server.listen(async () => {
+      // @ts-ignore
+      const { port } = server.address();
+
+      const raw = await handleRetry(
+        () => fetch(`http://127.0.0.1:${port}`),
+        "GET",
+        { attempts: 0 }
+      );
+      t.is(raw.status, 500);
+      t.is(i, 1);
+
+      server.close();
+
+      r();
+    });
+  });
+});
+
 test("retries for specified status codes", async t => {
   let i = 0;
   const server = createServer((req, res) => {

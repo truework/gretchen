@@ -88,12 +88,15 @@ export default function gretch<T = APIResponse, A = APIError>(
       methods[key] = async () => {
         let status = 500;
         let res;
+        let resolved: any;
 
         try {
           res = (await response).clone();
           status = res.status || 500;
 
-          let resolved = await res[key]();
+          if (await (res.clone()).text()) {
+            resolved = await res[key]();
+          }
 
           if (res.ok) {
             return {

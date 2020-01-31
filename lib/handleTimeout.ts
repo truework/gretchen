@@ -8,7 +8,6 @@ export async function handleTimeout(
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       if (controller) {
-        console.log("abort");
         controller.abort();
       }
 
