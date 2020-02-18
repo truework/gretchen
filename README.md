@@ -137,6 +137,20 @@ const response = await gretch("/api/user/12", {
 }).json();
 ```
 
+### Exception Handling
+
+`gretchen` is intended to never throw errors. Of course, exceptions can still
+occur. To handle them, provide an `onException` handler, which will be
+passed the full exception if one is caught:
+
+```js
+const response = gretch("/api/user/12", {
+  onException(e) {
+    // log exception
+  }
+}).json();
+```
+
 ## Usage with Typescript
 
 `gretchen` is written in Typescript and employs a _discriminated union_ to allow

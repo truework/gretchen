@@ -28,6 +28,7 @@ export type GretchOptions = {
   json?: { [key: string]: any };
   retry?: RetryOptions | boolean;
   timeout?: number;
+  onException?: (e: Error) => void;
   [key: string]: any;
 } & RequestInit;
 
@@ -118,6 +119,8 @@ export default function gretch<T = APIResponse, A = APIError>(
             data: undefined
           };
         } catch (e) {
+          if (opts.onException) opts.onException(e);
+
           return {
             response: res as Response,
             status,
