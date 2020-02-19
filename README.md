@@ -1,6 +1,6 @@
-# gretchen
+# gretchen ![npm](https://img.shields.io/npm/v/@truework/gretchen) [![](https://badgen.net/bundlephobia/minzip/@truework/gretchen)](https://bundlephobia.com/result?p=@truework/gretchen)
 
-Making `fetch` happen in Typescript. **1.3kb gzipped.**
+Making `fetch` happen in Typescript.
 
 > ⚠️ This is beta software, and it might not be ready for production use just
 > yet. However, if you'd like to try it out or contribute, we'd love that and
@@ -14,11 +14,16 @@ Making `fetch` happen in Typescript. **1.3kb gzipped.**
 - **smart:** respects `Retry-After` header
 - **small:** won't break your bundle
 
-## Install
+### Install
 
-```
+```bash
 npm i @truework/gretchen --save
 ```
+
+### Browser Support
+`gretchen` targets all modern browsers. For IE11 support, you'll need to polyfill
+`fetch`, `Promise`, and `Object.assign`. For Node.js, you'll need `fetch` and
+`AbortController`.
 
 # Usage
 
