@@ -7,44 +7,46 @@ import {
 } from "./lib/handleRetry";
 import { handleTimeout } from "./lib/handleTimeout";
 
-export type APIResponse = any;
-export type APIError = any;
+export type DefaultGretchResponse = any;
+export type DefaultGretchError = any;
 
-export type GretchResponse<T = APIResponse, A = APIError> =
+export type GretchResponse<T = DefaultGretchResponse, A = DefaultGretchError> =
   | {
-      response: Response;
+      url: string;
       status: number;
-      error: A;
       data: undefined;
+      error: A;
+      response: Response;
     }
   | {
-      response: Response;
+      url: string;
       status: number;
-      error: undefined;
       data: T;
+      error: undefined;
+      response: Response;
     };
+
+export type GretchHooks = {
+  before?: (request: Request, opts: GretchOptions) => void;
+  after?: (response: GretchResponse) => void;
+};
 
 export type GretchOptions = {
   json?: { [key: string]: any };
   retry?: RetryOptions | boolean;
   timeout?: number;
   onException?: (e: Error) => void;
+  hooks?: GretchHooks;
+  headers?: { [key: string]: any } & RequestInit['headers'];
   [key: string]: any;
 } & RequestInit;
 
-type GretchInstance<T, A> = {
+export type GretchInstance<T, A> = {
   [key: string]: () => Promise<GretchResponse<T, A>>;
 };
 
-// @ts-ignore
-const global = global || {};
-
-if (typeof AbortController === "function") {
-  global.AbortController = AbortController;
-}
-
-export default function gretch<T = APIResponse, A = APIError>(
-  url: RequestInfo,
+export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
+  url: string,
   opts: GretchOptions = {}
 ): GretchInstance<T, A> {
   const {
@@ -52,6 +54,7 @@ export default function gretch<T = APIResponse, A = APIError>(
     json,
     retry = defaultRetryOptions,
     timeout = 10000,
+    hooks = {},
     ...rest
   } = opts;
   const options: RequestInit = {
@@ -59,7 +62,7 @@ export default function gretch<T = APIResponse, A = APIError>(
     headers: {},
     ...(rest as RequestInit)
   };
-  const controller = global.supportsAbort ? new global.AbortController() : null;
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
 
   if (controller) {
     options.signal = controller.signal;
@@ -74,64 +77,69 @@ export default function gretch<T = APIResponse, A = APIError>(
     options.body = JSON.stringify(json);
   }
 
-  const request = () =>
-    timeout
-      ? handleTimeout(fetch(url, options), timeout, controller)
-      : fetch(url, options);
+  const request = new Request(url, options);
 
-  const response =
+  if (hooks.before) hooks.before(request, opts);
+
+  const fetcher = () =>
+    timeout
+      ? handleTimeout(fetch(request), timeout, controller)
+      : fetch(request);
+
+  const sent =
     retry === false
-      ? request()
-      : handleRetry(request, method, retry as Partial<RetryOptions>);
+      ? fetcher()
+      : handleRetry(fetcher, method, retry as Partial<RetryOptions>);
 
   return ["json", "text", "formData", "arrayBuffer", "blob"].reduce(
     (methods, key) => {
       methods[key] = async () => {
+        let response: Response;
         let status = 500;
-        let res;
-        let resolved: any;
+        let resolved: T | A;
+        let error;
+        let data;
 
         try {
-          res = (await response).clone();
-          status = res.status || 500;
+          response = (await sent).clone();
+          status = response.status || 500;
 
-          if (await (res.clone()).text()) {
-            resolved = await res[key]();
+          if (await response.clone().text()) {
+            resolved = await response[key]();
           }
 
-          if (res.ok) {
-            return {
-              response: res,
-              status,
-              error: undefined,
-              data: resolved as T
-            };
+          if (response.ok) {
+            data = resolved as T;
+          } else {
+            error = (resolved || new HTTPError(response)) as A;
           }
-
-          if (!resolved) {
-            resolved = new HTTPError(res);
-          }
-
-          return {
-            response: res,
-            status,
-            error: resolved as A,
-            data: undefined
-          };
         } catch (e) {
-          if (opts.onException) opts.onException(e);
-
-          return {
-            response: res as Response,
-            status,
-            error: (e ||
-              `You tried to make fetch happen, but it didn't.`) as any,
-            data: undefined
-          };
+          error = (e || `You tried to make fetch happen, but it didn't.`) as any;
         }
+
+        const res: GretchResponse<T, A> = {
+          url,
+          status,
+          data,
+          error,
+          response,
+        };
+
+        if (hooks.after) hooks.after(res);
+
+        return res;
       };
       return methods;
     },
     {}
   );
+}
+
+export function create(defaultOpts: GretchOptions = {}) {
+  return function wrappedGretch<T = DefaultGretchResponse, A = DefaultGretchError>(
+    url: string,
+    opts: GretchOptions = {}
+  ): GretchInstance<T, A> {
+    return gretch(url, { ...defaultOpts, ...opts });
+  };
 }

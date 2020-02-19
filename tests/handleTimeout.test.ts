@@ -1,9 +1,6 @@
+import 'cross-fetch/polyfill'
 import { createServer } from "http";
-import nodeFetch from "node-fetch";
 import test from "ava";
-
-// @ts-ignore
-global.fetch = nodeFetch;
 
 import fetch from '../lib/fetch';
 import { handleTimeout } from '../lib/handleTimeout';

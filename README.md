@@ -1,14 +1,14 @@
 # gretchen
 
-Making `fetch` happen in Typescript. **1.2kb gzipped.**
+Making `fetch` happen in Typescript. **1.3kb gzipped.**
 
 > ⚠️ This is beta software, and it might not be ready for production use just
-> yet.  However, if you'd like to try it out or contribute, we'd love that and
+> yet. However, if you'd like to try it out or contribute, we'd love that and
 > we'd love to hear your thoughts.
 
 ## Features
 
-- **safe:** will not throw on errors
+- **safe:** will not throw on non-200 responses
 - **precise:** allows for typing of both success & error responses
 - **resilient:** configurable retries & timeout
 - **smart:** respects `Retry-After` header
@@ -25,7 +25,7 @@ npm i @truework/gretchen --save
 Basic usage looks a lot like `window.fetch`:
 
 ```js
-import gretch from "@truework/gretchen";
+import { gretch } from "@truework/gretchen";
 
 const request = gretch("/api/user/12");
 ```
@@ -38,7 +38,7 @@ methods](https://developer.mozilla.org/en-US/docs/Web/API/Response#Body_Interfac
 const response = await request.json();
 ```
 
-Responses are somewhat special. In Typescript terms, they employ a
+`gretchen` responses are somewhat special. In Typescript terms, they employ a
 _discriminated union_ to allow you to type and consume both the success and
 error responses returned by your API.
 
@@ -46,8 +46,9 @@ In a successful response, the object will look something like this:
 
 ```js
 {
-  status: 200,
-  data: {}, // or whatever your data is
+  url: string,
+  status: number,
+  data: object, // Response body
   error: undefined,
 }
 ```
@@ -56,9 +57,10 @@ And for an error response it will look something like this:
 
 ```js
 {
-  status: 400,
+  url: string,
+  status: number,
   data: undefined,
-  error: {}, // an Error, or other data returned by your API
+  error: object, // Response body, or an Error
 }
 ```
 
@@ -137,18 +139,64 @@ const response = await gretch("/api/user/12", {
 }).json();
 ```
 
-### Exception Handling
+### Hooks
 
-`gretchen` is intended to never throw errors. Of course, exceptions can still
-occur. To handle them, provide an `onException` handler, which will be
-passed the full exception if one is caught:
+`gretchen` uses the concept of "hooks" to tap into the request lifecycle. Hooks
+are good for code that needs to run on every request, like adding tracking
+headers and logging errors.
+
+#### `before`
+
+The `before` hook runs just prior to the request being made. You can even modify
+the request directly, like to add headers. The `before` hook is passed the `Request`
+object, and the full options object.
 
 ```js
-const response = gretch("/api/user/12", {
-  onException(e) {
-    // log exception
+const response = await gretch("/api/user/12", {
+  hooks: {
+    before(request, options) {
+      request.headers.set("Tracking-ID", "abcde");
+    }
   }
 }).json();
+```
+
+#### `after`
+
+The `after` hook has the opportunity to read the `gretchen` response. It
+_cannot_ modify it. This is mostly useful for logging.
+
+```js
+const response = await gretch("/api/user/12", {
+  hooks: {
+    after({ url, status, data, error }) {
+      sentry.captureMessage(`${url} returned ${status}`);
+    }
+  }
+}).json();
+```
+
+## Instances
+
+`gretchen` also exports a `create` method that allows you to configure default
+options. This is useful if you want to attach something like logging to every
+request made with the returned instance.
+
+```js
+import { create } from "@truework/gretchen";
+
+const gretch = create({
+  headers: {
+    "X-Powered-By": "@truework/gretchen"
+  },
+  hooks: {
+    after({ error }) {
+      if (error) sentry.captureException(error);
+    }
+  }
+});
+
+await gretch("/api/user/12").json();
 ```
 
 ## Usage with Typescript
@@ -192,10 +240,10 @@ if (response.error) {
 # Why?
 
 There are a lot of options out there for requesting data. Most modern `fetch`
-implementations, however, rely on throwing errors. For type-safety, we needed
+implementations, however, rely on throwing errors. For type-safety, we wanted
 something that would allow us to type the response, no matter what. We also
-wanted to bake in a few opinions of our own, though the API should be flexible
-enough for most other applications.
+wanted to bake in a few opinions of our own, although the API is flexible enough
+for most other applications.
 
 # Credits
 

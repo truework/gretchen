@@ -1,11 +1,8 @@
+import "cross-fetch/polyfill";
 import { createServer } from "http";
-import nodeFetch from "node-fetch";
 import test from "ava";
 
-// @ts-ignore
-global.fetch = nodeFetch;
-
-import gretch from "../index";
+import { gretch, create } from "../index";
 
 test("successful request", async t => {
   const server = createServer((req, res) => {
@@ -76,11 +73,10 @@ test("retry fails, returns generic error", async t => {
       const { port } = server.address();
 
       const res = await gretch(`http://127.0.0.1:${port}`, {
-          retry: {
-            attempts: 1,
-          },
-        })
-        .text();
+        retry: {
+          attempts: 1
+        }
+      }).text();
 
       t.is(res.error.name, "HTTPError");
 
@@ -104,9 +100,8 @@ test("request timeout, returns generic error", async t => {
       const { port } = server.address();
 
       const res = await gretch(`http://127.0.0.1:${port}`, {
-          timeout: 500
-        })
-        .text();
+        timeout: 500
+      }).text();
 
       t.is(res.error.name, "HTTPTimeout");
 
@@ -133,13 +128,15 @@ test("json posts", async t => {
       // @ts-ignore
       const { port } = server.address();
 
-      const res = await gretch<{ success: boolean }>(`http://127.0.0.1:${port}`, {
+      const res = await gretch<{ success: boolean }>(
+        `http://127.0.0.1:${port}`,
+        {
           method: "POST",
           json: {
             foo: true
           }
-        })
-        .json();
+        }
+      ).json();
 
       t.is(res.data.success, true);
 
@@ -177,7 +174,7 @@ test("returns server error", async t => {
 test("returns data as error", async t => {
   const server = createServer((req, res) => {
     res.writeHead(400, {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json"
     });
     res.end(JSON.stringify({ message: "foo" }));
   });
@@ -203,7 +200,7 @@ test("returns data as error", async t => {
 test(`body exists, will fail to parse non-json`, async t => {
   const server = createServer((req, res) => {
     res.writeHead(200);
-    res.end('hey');
+    res.end("hey");
   });
 
   await new Promise(r => {
@@ -242,6 +239,72 @@ test(`body does not exist, will not fail to parse non-json`, async t => {
       }
 
       t.pass();
+
+      server.close();
+
+      r();
+    });
+  });
+});
+
+test(`hooks`, async t => {
+  const server = createServer((req, res) => {
+    res.writeHead(200);
+    res.end();
+  });
+
+  t.plan(2);
+
+  await new Promise(r => {
+    server.listen(async () => {
+      // @ts-ignore
+      const { port } = server.address();
+
+      await gretch(`http://127.0.0.1:${port}`, {
+        timeout: 50000,
+        hooks: {
+          before(request) {
+            t.truthy(request.url);
+          },
+          after({ status }) {
+            t.is(status, 200);
+          },
+        }
+      }).json();
+
+      server.close();
+
+      r();
+    });
+  });
+});
+
+test(`create`, async t => {
+  const server = createServer((req, res) => {
+    res.writeHead(200);
+    res.end();
+  });
+
+  t.plan(1);
+
+  await new Promise(r => {
+    server.listen(async () => {
+      // @ts-ignore
+      const { port } = server.address();
+
+      const wrappedGretch = create({
+        headers: {
+          'Foo': 'Bar',
+        },
+      });
+
+      await wrappedGretch(`http://127.0.0.1:${port}`, {
+        hooks: {
+          before(request, opts) {
+            t.is(opts.headers.Foo, 'Bar');
+          },
+        }
+      }).json();
 
       server.close();
 
