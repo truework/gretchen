@@ -28,7 +28,7 @@ export type GretchResponse<T = DefaultGretchResponse, A = DefaultGretchError> =
 
 export type GretchHooks = {
   before?: (request: Request, opts: GretchOptions) => void;
-  after?: (response: GretchResponse) => void;
+  after?: (response: GretchResponse, opts: GretchOptions) => void;
 };
 
 export type GretchOptions = {
@@ -125,7 +125,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
           response,
         };
 
-        if (hooks.after) hooks.after(res);
+        if (hooks.after) hooks.after(res, opts);
 
         return res;
       };
