@@ -1,4 +1,4 @@
-# gretchen ![npm](https://img.shields.io/npm/v/@truework/gretchen) [![](https://badgen.net/bundlephobia/minzip/@truework/gretchen)](https://bundlephobia.com/result?p=@truework/gretchen)
+# gretchen ![npm](https://img.shields.io/npm/v/gretchen) [![](https://badgen.net/bundlephobia/minzip/gretchen)](https://bundlephobia.com/result?p=gretchen)
 
 Making `fetch` happen in Typescript.
 
@@ -17,7 +17,7 @@ Making `fetch` happen in Typescript.
 ### Install
 
 ```bash
-npm i @truework/gretchen --save
+npm i gretchen --save
 ```
 
 ### Browser Support
@@ -30,7 +30,7 @@ npm i @truework/gretchen --save
 Basic usage looks a lot like `window.fetch`:
 
 ```js
-import { gretch } from "@truework/gretchen";
+import { gretch } from "gretchen";
 
 const request = gretch("/api/user/12");
 ```
@@ -188,11 +188,11 @@ options. This is useful if you want to attach something like logging to every
 request made with the returned instance.
 
 ```js
-import { create } from "@truework/gretchen";
+import { create } from "gretchen";
 
 const gretch = create({
   headers: {
-    "X-Powered-By": "@truework/gretchen"
+    "X-Powered-By": "gretchen"
   },
   hooks: {
     after({ error }) {

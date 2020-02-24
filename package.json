@@ -1,5 +1,5 @@
 {
-  "name": "@truework/gretchen",
+  "name": "gretchen",
   "version": "0.1.2",
   "description": "Making fetch happen in Typescript.",
   "source": "index.ts",
