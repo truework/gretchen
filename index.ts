@@ -105,7 +105,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
           status = response.status || 500;
 
           if (await response.clone().text()) {
-            resolved = await response[key]();
+            resolved = await response.clone()[key]();
           }
 
           if (response.ok) {
