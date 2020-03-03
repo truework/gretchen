@@ -42,7 +42,12 @@ export type GretchOptions = {
 } & RequestInit;
 
 export type GretchInstance<T, A> = {
-  [key: string]: () => Promise<GretchResponse<T, A>>;
+  flush(): Promise<{ url: string; status: number; response: Response }>;
+  arrayBuffer: () => Promise<GretchResponse<T, A>>;
+  blob: () => Promise<GretchResponse<T, A>>;
+  formData: () => Promise<GretchResponse<T, A>>;
+  json: () => Promise<GretchResponse<T, A>>;
+  text: () => Promise<GretchResponse<T, A>>;
 };
 
 export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
@@ -92,52 +97,60 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
       ? fetcher()
       : handleRetry(fetcher, method, retry as Partial<RetryOptions>);
 
-  return ["json", "text", "formData", "arrayBuffer", "blob"].reduce(
-    (methods, key) => {
-      methods[key] = async () => {
-        let response: Response;
-        let status = 500;
-        let resolved: T | A;
-        let error;
-        let data;
+  const instance = {
+    async flush() {
+      const response = (await sent).clone();
+      return {
+        url,
+        status: response.status,
+        response
+      };
+    }
+  };
 
-        try {
-          response = (await sent).clone();
-          status = response.status || 500;
+  ["json", "text", "formData", "arrayBuffer", "blob"].forEach(key => {
+    instance[key] = async () => {
+      let response: Response;
+      let status = 500;
+      let resolved: T | A;
+      let error;
+      let data;
 
-          if (
-            status !== 204 &&
-            parseInt(response.headers.get("Content-Length")) > 0
-          ) {
-            resolved = await response.clone()[key]();
-          }
+      try {
+        response = (await sent).clone();
+        status = response.status || 500;
 
-          if (response.ok) {
-            data = resolved as T;
-          } else {
-            error = (resolved || new HTTPError(response)) as A;
-          }
-        } catch (e) {
-          error = (e ||
-            `You tried to make fetch happen, but it didn't.`) as any;
+        if (
+          status !== 204 &&
+          parseInt(response.headers.get("Content-Length")) > 0
+        ) {
+          resolved = await response.clone()[key]();
         }
 
-        const res: GretchResponse<T, A> = {
-          url,
-          status,
-          data,
-          error,
-          response
-        };
+        if (response.ok) {
+          data = resolved as T;
+        } else {
+          error = (resolved || new HTTPError(response)) as A;
+        }
+      } catch (e) {
+        error = (e || `You tried to make fetch happen, but it didn't.`) as any;
+      }
 
-        if (hooks.after) hooks.after(res, opts);
-
-        return res;
+      const res: GretchResponse<T, A> = {
+        url,
+        status,
+        data,
+        error,
+        response
       };
-      return methods;
-    },
-    {}
-  );
+
+      if (hooks.after) hooks.after(res, opts);
+
+      return res;
+    };
+  });
+
+  return instance as GretchInstance<T, A>;
 }
 
 export function create(defaultOpts: GretchOptions = {}) {
