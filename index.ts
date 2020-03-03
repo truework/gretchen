@@ -37,7 +37,7 @@ export type GretchOptions = {
   timeout?: number;
   onException?: (e: Error) => void;
   hooks?: GretchHooks;
-  headers?: { [key: string]: any } & RequestInit['headers'];
+  headers?: { [key: string]: any } & RequestInit["headers"];
   [key: string]: any;
 } & RequestInit;
 
@@ -62,7 +62,8 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
     headers: {},
     ...(rest as RequestInit)
   };
-  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const controller =
+    typeof AbortController !== "undefined" ? new AbortController() : null;
 
   if (controller) {
     options.signal = controller.signal;
@@ -104,7 +105,10 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
           response = (await sent).clone();
           status = response.status || 500;
 
-          if (await response.clone().text()) {
+          if (
+            status !== 204 &&
+            parseInt(response.headers.get("Content-Length")) > 0
+          ) {
             resolved = await response.clone()[key]();
           }
 
@@ -114,7 +118,8 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
             error = (resolved || new HTTPError(response)) as A;
           }
         } catch (e) {
-          error = (e || `You tried to make fetch happen, but it didn't.`) as any;
+          error = (e ||
+            `You tried to make fetch happen, but it didn't.`) as any;
         }
 
         const res: GretchResponse<T, A> = {
@@ -122,7 +127,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
           status,
           data,
           error,
-          response,
+          response
         };
 
         if (hooks.after) hooks.after(res, opts);
@@ -136,10 +141,10 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
 }
 
 export function create(defaultOpts: GretchOptions = {}) {
-  return function wrappedGretch<T = DefaultGretchResponse, A = DefaultGretchError>(
-    url: string,
-    opts: GretchOptions = {}
-  ): GretchInstance<T, A> {
+  return function wrappedGretch<
+    T = DefaultGretchResponse,
+    A = DefaultGretchError
+  >(url: string, opts: GretchOptions = {}): GretchInstance<T, A> {
     return gretch(url, { ...defaultOpts, ...opts });
   };
 }

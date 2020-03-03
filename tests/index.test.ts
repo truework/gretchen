@@ -147,10 +147,14 @@ test("json posts", async t => {
   });
 });
 
-test("returns server error", async t => {
+test("won't parse 204 status", async t => {
   const server = createServer((req, res) => {
-    res.writeHead(500);
-    res.end(JSON.stringify({ message: "foo" }));
+    const body = { message: "foo" };
+    res.writeHead(204, {
+      "Content-Type": "application/json",
+      "Content-Length": JSON.stringify(body).length
+    });
+    res.end(JSON.stringify(body));
   });
 
   await new Promise(r => {
@@ -160,9 +164,8 @@ test("returns server error", async t => {
 
       const res = await gretch(`http://127.0.0.1:${port}`).json();
 
-      if (res.error) {
-        t.is(res.error.message, "foo");
-      }
+      t.falsy(res.data);
+      t.falsy(res.error);
 
       server.close();
 
@@ -173,10 +176,12 @@ test("returns server error", async t => {
 
 test("returns data as error", async t => {
   const server = createServer((req, res) => {
+    const body = { message: "foo" };
     res.writeHead(400, {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Content-Length": JSON.stringify(body).length
     });
-    res.end(JSON.stringify({ message: "foo" }));
+    res.end(JSON.stringify(body));
   });
 
   await new Promise(r => {
@@ -199,7 +204,9 @@ test("returns data as error", async t => {
 
 test(`body exists, will fail to parse non-json`, async t => {
   const server = createServer((req, res) => {
-    res.writeHead(200);
+    res.writeHead(200, {
+      "Content-Length": "3"
+    });
     res.end("hey");
   });
 
@@ -213,6 +220,36 @@ test(`body exists, will fail to parse non-json`, async t => {
       if (res.error) {
         t.pass();
       }
+
+      server.close();
+
+      r();
+    });
+  });
+});
+
+/**
+ * Ccalling writeHead overrides default Content-Length
+ * set by res.end(), i.e. if we removed writeHead here
+ * this test would break.
+ */
+test(`won't parse body if Content-Length header doesn't exist`, async t => {
+  const server = createServer((req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+    });
+    res.end(JSON.stringify({ foo: true }));
+  });
+
+  await new Promise(r => {
+    server.listen(async () => {
+      // @ts-ignore
+      const { port } = server.address();
+
+      const res = await gretch(`http://127.0.0.1:${port}`).json();
+
+      t.falsy(res.data);
+      t.falsy(res.error);
 
       server.close();
 
