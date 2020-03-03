@@ -1,6 +1,6 @@
 {
   "name": "gretchen",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Making fetch happen in Typescript.",
   "source": "index.ts",
   "main": "dist/gretchen.js",
