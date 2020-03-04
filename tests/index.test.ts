@@ -236,7 +236,7 @@ test(`body exists, will fail to parse non-json`, async t => {
 test(`won't parse body if Content-Length header doesn't exist`, async t => {
   const server = createServer((req, res) => {
     res.writeHead(200, {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     });
     res.end(JSON.stringify({ foo: true }));
   });
@@ -305,7 +305,7 @@ test(`hooks`, async t => {
           },
           after({ status }) {
             t.is(status, 200);
-          },
+          }
         }
       }).json();
 
@@ -331,17 +331,51 @@ test(`create`, async t => {
 
       const wrappedGretch = create({
         headers: {
-          'Foo': 'Bar',
-        },
+          Foo: "Bar"
+        }
       });
 
       await wrappedGretch(`http://127.0.0.1:${port}`, {
         hooks: {
           before(request, opts) {
-            t.is(opts.headers.Foo, 'Bar');
-          },
+            t.is(opts.headers.Foo, "Bar");
+          }
         }
       }).json();
+
+      server.close();
+
+      r();
+    });
+  });
+});
+
+test(`body not parsed with flush`, async t => {
+  const server = createServer((req, res) => {
+    const body = { message: "foo" };
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Content-Length": JSON.stringify(body).length
+    });
+    res.end(JSON.stringify(body));
+  });
+
+  await new Promise(r => {
+    server.listen(async () => {
+      // @ts-ignore
+      const { port } = server.address();
+
+      const res = await gretch(`http://127.0.0.1:${port}`).flush();
+
+      t.truthy(res.url);
+      t.truthy(res.status);
+      t.truthy(res.response);
+      // @ts-ignore
+      t.falsy(res.error);
+      // @ts-ignore
+      t.falsy(res.data);
+
+      t.pass();
 
       server.close();
 
