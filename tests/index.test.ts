@@ -367,6 +367,9 @@ test(`body not parsed with flush`, async t => {
 
       const res = await gretch(`http://127.0.0.1:${port}`).flush();
 
+      t.truthy(res.url);
+      t.truthy(res.status);
+      t.truthy(res.response);
       // @ts-ignore
       t.falsy(res.error);
       // @ts-ignore
