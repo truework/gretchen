@@ -2,9 +2,7 @@
 
 Making `fetch` happen in TypeScript.
 
-> 🔎 This is beta software. We're using in production – ~6M requests/month – but
-> your mileage may vary. However, if you'd like to try it out or contribute,
-> we'd love that and we'd love to hear your thoughts.
+> Looking for more info? Check out [our blog post](https://medium.com/@estrattonbailey/introducing-gretchen-making-fetch-happen-in-typescript-87ab0bd66027?source=friends_link&sk=884da87efacd2db29d670a04f6651f60).
 
 ## Features
 
@@ -13,6 +11,10 @@ Making `fetch` happen in TypeScript.
 - **resilient:** configurable retries & timeout
 - **smart:** respects `Retry-After` header
 - **small:** won't break your bundle
+
+> 🔎 This is beta software. We're using in production – ~6M requests/month – but
+> your mileage may vary. However, if you'd like to try it out or contribute,
+> we'd love that and we'd love to hear your thoughts.
 
 ### Install
 
