@@ -12,10 +12,6 @@ Making `fetch` happen in TypeScript.
 - **smart:** respects `Retry-After` header
 - **small:** won't break your bundle
 
-> 🔎 This is beta software. We're using in production – ~6M requests/month – but
-> your mileage may vary. However, if you'd like to try it out or contribute,
-> we'd love that and we'd love to hear your thoughts.
-
 ### Install
 
 ```bash
