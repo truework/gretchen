@@ -350,6 +350,28 @@ test(`create`, async t => {
   });
 });
 
+test(`create with baseURL`, async t => {
+  const wrappedGretch = create({
+    baseURL: `http://www.foo.com`
+  });
+
+  const res = await wrappedGretch("api").json();
+
+  t.is(res.url, `http://www.foo.com/api`);
+});
+
+test(`create with baseURL, override per request`, async t => {
+  const wrappedGretch = create({
+    baseURL: `http://www.foo.com`
+  });
+
+  const res = await wrappedGretch("/api", {
+    baseURL: `http://www.bar.com`
+  }).json();
+
+  t.is(res.url, `http://www.bar.com/api`);
+});
+
 test(`body not parsed with flush`, async t => {
   const server = createServer((req, res) => {
     const body = { message: "foo" };
