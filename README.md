@@ -272,6 +272,44 @@ const gretch = create({
 await gretch("/api/user/12").json();
 ```
 
+### Base URLs
+
+Another common use case for creating a separate instance is to specify a
+`baseURL` for all requests. The `baseURL` will then be resolved against the base
+URL of the page, allowing support for both absolute and relative `baseURL`
+values.
+
+In the example below, assume requests are being made from a page located at
+`https://www.mysite.com`.
+
+Functionally, this:
+
+```js
+const gretch = create({
+  baseURL: "https://www.mysite.com/api"
+});
+```
+
+Is equivalent to this:
+
+```js
+const gretch = create({
+  baseURL: "/api"
+});
+```
+
+So this request:
+
+```js
+await gretch("/user/12").json();
+```
+
+Will resolve to `https://www.mysite.com/api/user/12`.
+
+**Note:** if a `baseURL` is specified, URLs will be normalized in order to
+concatenate them i.e. a leading slash – `/user/12` vs `user/12` – will not
+impact how the request is resolved.
+
 ## Usage with TypeScript
 
 `gretchen` is written in TypeScript and employs a _discriminated union_ to allow

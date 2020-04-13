@@ -6,6 +6,7 @@ import {
   RetryOptions
 } from "./lib/handleRetry";
 import { handleTimeout } from "./lib/handleTimeout";
+import { normalizeURL } from "./lib/utils";
 
 export type DefaultGretchResponse = any;
 export type DefaultGretchError = any;
@@ -32,6 +33,7 @@ export type GretchHooks = {
 };
 
 export type GretchOptions = {
+  baseURL?: string;
   json?: { [key: string]: any };
   retry?: RetryOptions | boolean;
   timeout?: number;
@@ -56,6 +58,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
 ): GretchInstance<T, A> {
   const {
     method = "GET",
+    baseURL,
     json,
     retry = defaultRetryOptions,
     timeout = 10000,
@@ -83,7 +86,9 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
     options.body = JSON.stringify(json);
   }
 
-  const request = new Request(url, options);
+  const normalizedURL =
+    baseURL !== undefined ? normalizeURL(url, { baseURL }) : url;
+  const request = new Request(normalizedURL, options);
 
   if (hooks.before) hooks.before(request, opts);
 
@@ -101,7 +106,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
     async flush() {
       const response = (await sent).clone();
       return {
-        url,
+        url: normalizedURL,
         status: response.status,
         response
       };
@@ -137,7 +142,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
       }
 
       const res: GretchResponse<T, A> = {
-        url,
+        url: normalizedURL,
         status,
         data,
         error,
