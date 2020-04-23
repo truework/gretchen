@@ -1,6 +1,10 @@
+const protocolRegEx = /https?:\/\//;
+
 export function normalizeURL(url: string, { baseURL }: { baseURL: string }) {
-  return (
-    (/\/$/.test(baseURL) ? baseURL : baseURL + "/") +
-    (/^\//.test(url) ? url.replace(/^\//, "") : url)
-  );
+  if (protocolRegEx.test(url) || !baseURL) return url;
+
+  const [protocol] = baseURL.match(protocolRegEx) || [""];
+  const path = (baseURL.replace(protocol, "") + "/").replace(/\/\//, "/");
+
+  return protocol + (path + url).replace(/\/\//, "/");
 }
