@@ -125,10 +125,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
         response = (await sent).clone();
         status = response.status || 500;
 
-        if (
-          status !== 204 &&
-          parseInt(response.headers.get("Content-Length")) > 0
-        ) {
+        if (status !== 204) {
           resolved = await response.clone()[key]();
         }
 
