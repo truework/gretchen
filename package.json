@@ -13,13 +13,13 @@
   "scripts": {
     "build": "microbundle build",
     "watch": "microbundle watch",
-    "postbuild": "npm run test",
     "test": "ava tests/**.test.ts --verbose",
-    "release": "np"
+    "format": "prettier-standard --format"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged"
+      "pre-commit": "prettier-standard --format --staged",
+      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
     }
   },
   "keywords": [
@@ -54,13 +54,13 @@
   "homepage": "https://github.com/truework/gretchen#readme",
   "devDependencies": {
     "ava": "^2.4.0",
+    "commitizen": "^4.2.2",
     "cross-fetch": "^3.0.4",
+    "cz-conventional-changelog": "^3.3.0",
     "husky": "^4.2.3",
     "microbundle": "^0.11.0",
-    "node-fetch": "^2.6.0",
-    "np": "^6.2.3",
-    "prettier": "^1.19.1",
-    "pretty-quick": "^2.0.1",
+    "prettier-standard": "^16.4.1",
+    "semantic-release": "^17.2.2",
     "ts-node": "^8.4.1"
   },
   "ava": {
