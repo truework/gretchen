@@ -55,6 +55,7 @@
   "devDependencies": {
     "ava": "^2.4.0",
     "commitizen": "^4.2.2",
+    "core-js": "^3.7.0",
     "cross-fetch": "^3.0.4",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^4.2.3",
