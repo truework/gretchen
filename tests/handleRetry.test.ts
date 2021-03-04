@@ -2,7 +2,6 @@ import 'cross-fetch/polyfill'
 import { createServer } from 'http'
 import test from 'ava'
 
-import fetch from '../lib/fetch'
 import { handleRetry } from '../lib/handleRetry'
 import { handleTimeout } from '../lib/handleTimeout'
 

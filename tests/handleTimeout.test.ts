@@ -2,7 +2,6 @@ import 'cross-fetch/polyfill'
 import { createServer } from 'http'
 import test from 'ava'
 
-import fetch from '../lib/fetch'
 import { handleTimeout } from '../lib/handleTimeout'
 
 test('will timeout', async t => {
