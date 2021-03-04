@@ -1,4 +1,3 @@
-import fetch from './lib/fetch'
 import { HTTPError } from './lib/errors'
 import {
   handleRetry,
