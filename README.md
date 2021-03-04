@@ -358,8 +358,7 @@ for most other applications.
 
 ### Credits
 
-This library was inspired by [ky](https://github.com/sindresorhus/ky) and
-[fetch-retry](https://github.com/zeit/fetch-retry) and others.
+This library was inspired by [ky](https://github.com/sindresorhus/ky), [fetch-retry](https://github.com/zeit/fetch-retry), and others.
 
 ### License
 
