@@ -103,7 +103,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError> (
 
   const instance = {
     async flush () {
-      const response = (await sent).clone()
+      const response = await sent
       return {
         url: normalizedURL,
         status: response.status,
@@ -120,11 +120,11 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError> (
       let data
 
       try {
-        response = (await sent).clone()
+        response = await sent
         status = response.status || 500
 
         if (status !== 204) {
-          resolved = await response.clone()[key]()
+          resolved = await response[key]()
         }
 
         if (response.ok) {
