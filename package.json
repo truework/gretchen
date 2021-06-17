@@ -7,13 +7,13 @@
   "modern": "dist/gretchen.esm.js",
   "module": "dist/gretchen.esm.js",
   "unpkg": "dist/gretchen.iife.js",
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
   "scripts": {
-    "build": "for arg in 'cjs' 'esm' 'iife'; do npx esbuild index.ts --bundle --minify --format=$arg --outfile=dist/gretchen.$arg.js; done",
+    "build": "microbundle",
+    "watch": "microbundle watch",
     "test": "node test",
     "format": "prettier-standard --format",
     "prepare": "npx husky install && npx commitizen init cz-conventional-changelog --save-dev --save-exact"
@@ -54,9 +54,9 @@
     "core-js": "^3.7.0",
     "cross-fetch": "^3.0.4",
     "cz-conventional-changelog": "^3.3.0",
-    "esbuild": "^0.12.9",
     "esbuild-register": "^2.6.0",
     "husky": "^6.0.0",
+    "microbundle": "^0.13.3",
     "prettier-standard": "^16.4.1",
     "semantic-release": "^17.2.2",
     "typescript": "^4.3.3"
