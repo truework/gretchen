@@ -6,9 +6,17 @@ import {
 } from './lib/handleRetry'
 import { handleTimeout } from './lib/handleTimeout'
 import { normalizeURL } from './lib/utils'
+import { merge } from './lib/merge'
 
 export type DefaultGretchResponse = any
 export type DefaultGretchError = any
+
+export type MergeableObject =
+  | {
+      [k: string]: MergeableObject
+    }
+  | Partial<GretchOptions>
+  | any[]
 
 export type GretchResponse<T = DefaultGretchResponse, A = DefaultGretchError> =
   | {
@@ -158,6 +166,6 @@ export function create (defaultOpts: GretchOptions = {}) {
     T = DefaultGretchResponse,
     A = DefaultGretchError
   > (url: string, opts: GretchOptions = {}): GretchInstance<T, A> {
-    return gretch(url, { ...defaultOpts, ...opts })
+    return gretch(url, merge(defaultOpts, opts))
   }
 }
