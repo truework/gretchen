@@ -9,6 +9,7 @@ require('./utils.test').default(test, assert)
 require('./handleRetry.test').default(test, assert)
 require('./handleTimeout.test').default(test, assert)
 require('./index.test').default(test, assert)
+require('./merge.test').default(test, assert)
 
 process.on('unhandledRejection', e => {
   console.error(e)

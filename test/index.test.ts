@@ -267,16 +267,25 @@ export default (test, assert) => {
         await gretch(`http://127.0.0.1:${port}`, {
           timeout: 50000,
           hooks: {
-            before (request) {
+            before (request, opts) {
+              assert(request.url)
+              assert(opts.timeout)
               hooks++
             },
-            after ({ status }) {
-              hooks++
-            }
+            after: [
+              (response, opts) => {
+                assert(response.status)
+                assert(opts.timeout)
+                hooks++
+              },
+              () => {
+                hooks++
+              }
+            ]
           }
         }).json()
 
-        assert(hooks === 2)
+        assert(hooks === 3)
 
         server.close()
 
