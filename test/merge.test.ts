@@ -51,22 +51,30 @@ export default (test, assert) => {
     assert.equal(o.headers['x-out'], 'out')
   })
 
-  test('overwrites values', () => {
+  test('overwrites mixed values', () => {
     const o = merge(
       {
         timeout: 100,
-        retry: {
-          attempts: 3
+        retry: false,
+        hooks: {
+          after () {}
         }
       },
       {
         timeout: 200,
-        retry: false
+        retry: {
+          attempts: 3
+        },
+        hooks: {
+          after: [() => {}]
+        }
       }
     )
 
     assert.equal(o.timeout, 200)
-    assert.equal(o.retry, false)
+    // @ts-ignore
+    assert.equal(o.retry.attempts, 3)
+    assert(Array.isArray(o.hooks.after))
   })
 
   test('merges hooks', () => {

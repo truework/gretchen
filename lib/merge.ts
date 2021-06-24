@@ -25,10 +25,12 @@ export function merge (
           headersToObj(new Headers(a[k])),
           headersToObj(new Headers(v))
         )
-      } else if (v.pop) {
+      } else if (v.pop && a[k].pop) {
         c[k] = [...(a[k] || []), ...v]
-      } else {
+      } else if (typeof a[k] === 'object' && !a[k].pop) {
         c[k] = merge(a[k], v)
+      } else {
+        c[k] = v
       }
     } else {
       c[k] = v

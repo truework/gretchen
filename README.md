@@ -218,6 +218,10 @@ const { url, status, response } = await gretch(
 are good for code that needs to run on every request, like adding tracking
 headers and logging errors.
 
+Hooks should be defined as an array. That way you can compose multiple hooks
+per-request, and define and merge default hooks when [creating
+instances](#creating-instances).
+
 #### `before`
 
 The `before` hook runs just prior to the request being made. You can even modify
@@ -227,24 +231,29 @@ object, and the full options object.
 ```js
 const response = await gretch('/api/user/12', {
   hooks: {
-    before (request, options) {
-      request.headers.set('Tracking-ID', 'abcde')
-    }
+    before: [
+      (request, options) => {
+        request.headers.set('Tracking-ID', 'abcde')
+      }
+    ]
   }
 }).json()
 ```
 
 #### `after`
 
-The `after` hook has the opportunity to read the `gretchen` response. It
+The `after` runs after the request has resolved and any body interface methods
+have been called. It has the opportunity to read the `gretchen` response. It
 _cannot_ modify it. This is mostly useful for logging.
 
 ```js
 const response = await gretch('/api/user/12', {
   hooks: {
-    after ({ url, status, data, error }) {
-      sentry.captureMessage(`${url} returned ${status}`)
-    }
+    after: [
+      ({ url, status, data, error }, options) => {
+        sentry.captureMessage(`${url} returned ${status}`)
+      }
+    ]
   }
 }).json()
 ```
