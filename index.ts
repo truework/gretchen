@@ -6,9 +6,17 @@ import {
 } from './lib/handleRetry'
 import { handleTimeout } from './lib/handleTimeout'
 import { normalizeURL } from './lib/utils'
+import { merge } from './lib/merge'
 
 export type DefaultGretchResponse = any
 export type DefaultGretchError = any
+
+export type MergeableObject =
+  | {
+      [k: string]: MergeableObject
+    }
+  | Partial<GretchOptions>
+  | any[]
 
 export type GretchResponse<T = DefaultGretchResponse, A = DefaultGretchError> =
   | {
@@ -26,9 +34,15 @@ export type GretchResponse<T = DefaultGretchResponse, A = DefaultGretchError> =
       response: Response
     }
 
+export type GretchBeforeHook = (request: Request, opts: GretchOptions) => void
+export type GretchAfterHook = (
+  response: GretchResponse,
+  opts: GretchOptions
+) => void
+
 export type GretchHooks = {
-  before?: (request: Request, opts: GretchOptions) => void
-  after?: (response: GretchResponse, opts: GretchOptions) => void
+  before?: GretchBeforeHook | GretchBeforeHook[]
+  after?: GretchAfterHook | GretchAfterHook[]
 }
 
 export type GretchOptions = {
@@ -89,7 +103,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError> (
     baseURL !== undefined ? normalizeURL(url, { baseURL }) : url
   const request = new Request(normalizedURL, options)
 
-  if (hooks.before) hooks.before(request, opts)
+  if (hooks.before) [].concat(hooks.before).forEach(hook => hook(request, opts))
 
   const fetcher = () =>
     timeout
@@ -144,7 +158,8 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError> (
         response
       }
 
-      if (hooks.after) hooks.after(res, opts)
+      if (hooks.after)
+        [].concat(hooks.after).forEach(hook => hook({ ...res }, opts))
 
       return res
     }
@@ -158,6 +173,6 @@ export function create (defaultOpts: GretchOptions = {}) {
     T = DefaultGretchResponse,
     A = DefaultGretchError
   > (url: string, opts: GretchOptions = {}): GretchInstance<T, A> {
-    return gretch(url, { ...defaultOpts, ...opts })
+    return gretch(url, merge(defaultOpts, opts))
   }
 }
