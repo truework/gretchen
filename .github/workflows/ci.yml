@@ -9,14 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 12
       - name: Installing dependencies
         run: npm i
-      - name: Build
+      - name: Build and test
         run: npm run build
-      - name: Test
-        run: npm run test

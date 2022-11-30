@@ -8,22 +8,20 @@ on:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 12
       - name: Installing dependencies
         run: npm i
-      - name: Build
+      - name: Build and test
         run: npm run build
-      - name: Test
-        run: npm run test
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.TRUEWORK_TEAM_NPM_TOKEN }}
-        run: npm login && npm publish || true
+          NODE_AUTH_TOKEN: ${{ secrets.TRUEWORK_TEAM_NPM_TOKEN }}
+        run: npm whoami && npm publish || true
