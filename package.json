@@ -13,7 +13,6 @@
   "scripts": {
     "build": "microbundle build",
     "watch": "microbundle watch",
-    "publish": "npm publish",
     "postbuild": "npm run test",
     "test": "ava tests/**.test.ts --verbose"
   },
