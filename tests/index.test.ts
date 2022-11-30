@@ -229,11 +229,11 @@ test(`body exists, will fail to parse non-json`, async t => {
 });
 
 /**
- * Ccalling writeHead overrides default Content-Length
+ * Calling writeHead overrides default Content-Length
  * set by res.end(), i.e. if we removed writeHead here
  * this test would break.
  */
-test(`won't parse body if Content-Length header doesn't exist`, async t => {
+test(`will parse body if Content-Length header doesn't exist`, async t => {
   const server = createServer((req, res) => {
     res.writeHead(200, {
       "Content-Type": "application/json"
@@ -248,7 +248,7 @@ test(`won't parse body if Content-Length header doesn't exist`, async t => {
 
       const res = await gretch(`http://127.0.0.1:${port}`).json();
 
-      t.falsy(res.data);
+      t.truthy(res.data);
       t.falsy(res.error);
 
       server.close();
