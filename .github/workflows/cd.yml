@@ -18,10 +18,8 @@ jobs:
           node-version: 12
       - name: Installing dependencies
         run: npm i
-      - name: Build
+      - name: Build and test
         run: npm run build
-      - name: Test
-        run: npm run test
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
