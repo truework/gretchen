@@ -1,110 +1,115 @@
-import { merge } from '../lib/merge'
+import { merge } from "../lib/merge";
 
 export default (test, assert) => {
-  test('merges primitives', () => {
+  test("merges primitives", () => {
     const o = merge(
       {
-        str: 'in',
+        str: "in",
         bool: false,
         int: 0,
-        arr: ['in'],
+        arr: ["in"],
         obj: {
-          prop: 'in'
-        }
+          prop: "in",
+        },
       },
       {
-        str: 'out',
+        str: "out",
         bool: true,
         int: 1,
-        arr: ['out'],
+        arr: ["out"],
         obj: {
-          prop: 'out'
-        }
+          prop: "out",
+        },
       }
-    )
+    );
 
-    assert.equal(o.str, 'out')
-    assert.equal(o.bool, true)
-    assert.equal(o.int, 1)
-    assert.deepEqual(o.arr, ['in', 'out'])
-    assert.equal(o.obj.prop, 'out')
-  })
+    assert.equal(o.str, "out");
+    assert.equal(o.bool, true);
+    assert.equal(o.int, 1);
+    assert.deepEqual(o.arr, ["in", "out"]);
+    assert.equal(o.obj.prop, "out");
+  });
 
-  test('merges headers', () => {
+  test("merges headers", () => {
     const o = merge(
       {
         headers: new Headers({
-          'X-In': 'in',
-          'X-Header': 'in'
-        })
+          "X-In": "in",
+          "X-Header": "in",
+        }),
       },
       {
         headers: {
-          'X-Out': 'out',
-          'X-Header': 'out'
-        }
+          "X-Out": "out",
+          "X-Header": "out",
+        },
       }
-    )
+    );
 
-    assert.equal(o.headers['x-header'], 'out')
-    assert.equal(o.headers['x-in'], 'in')
-    assert.equal(o.headers['x-out'], 'out')
-  })
+    assert.equal(o.headers["x-header"], "out");
+    assert.equal(o.headers["x-in"], "in");
+    assert.equal(o.headers["x-out"], "out");
+  });
 
-  test('overwrites mixed values', () => {
+  test("overwrites mixed values", () => {
     const o = merge(
       {
         timeout: 100,
         retry: false,
         hooks: {
-          after () {}
-        }
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          after() {},
+        },
       },
       {
         timeout: 200,
         retry: {
-          attempts: 3
+          attempts: 3,
         },
         hooks: {
-          after: [() => {}]
-        }
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          after: [() => {}],
+        },
       }
-    )
+    );
 
-    assert.equal(o.timeout, 200)
+    assert.equal(o.timeout, 200);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    assert.equal(o.retry.attempts, 3)
-    assert(Array.isArray(o.hooks.after))
-  })
+    assert.equal(o.retry.attempts, 3);
+    assert(Array.isArray(o.hooks.after));
+  });
 
-  test('merges hooks', () => {
+  test("merges hooks", () => {
     const o = merge(
       {
         hooks: {
-          before () {}
-        }
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          before() {},
+        },
       },
       {
         hooks: {
-          after () {}
-        }
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          after() {},
+        },
       }
-    )
+    );
 
-    assert(typeof o.hooks.before === 'function')
-    assert(typeof o.hooks.after === 'function')
-  })
+    assert(typeof o.hooks.before === "function");
+    assert(typeof o.hooks.after === "function");
+  });
 
-  test('clones reference object', () => {
+  test("clones reference object", () => {
     const defaults = {
-      prop: 'default'
-    }
+      prop: "default",
+    };
 
     const o = merge(defaults, {
-      prop: 'out'
-    })
+      prop: "out",
+    });
 
-    assert.equal(defaults.prop, 'default')
-    assert.equal(o.prop, 'out')
-  })
-}
+    assert.equal(defaults.prop, "default");
+    assert.equal(o.prop, "out");
+  });
+};

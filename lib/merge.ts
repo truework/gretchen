@@ -1,41 +1,41 @@
-import { GretchOptions, MergeableObject } from '../index'
+import { GretchOptions, MergeableObject } from "../index";
 
-function headersToObj (headers: Headers) {
-  let o = {}
+function headersToObj(headers: Headers) {
+  const o = {};
 
   headers.forEach((v, k) => {
-    o[k] = v
-  })
+    o[k] = v;
+  });
 
-  return o
+  return o;
 }
 
-export function merge (
+export function merge(
   a: MergeableObject = {},
   b: MergeableObject = {}
 ): GretchOptions {
-  let c = { ...a }
+  const c = { ...a };
 
   for (const k of Object.keys(b)) {
-    const v = b[k]
+    const v = b[k];
 
-    if (typeof v === 'object') {
-      if (k === 'headers') {
+    if (typeof v === "object") {
+      if (k === "headers") {
         c[k] = merge(
           headersToObj(new Headers(a[k])),
           headersToObj(new Headers(v))
-        )
+        );
       } else if (v.pop && a[k].pop) {
-        c[k] = [...(a[k] || []), ...v]
-      } else if (typeof a[k] === 'object' && !a[k].pop) {
-        c[k] = merge(a[k], v)
+        c[k] = [...(a[k] || []), ...v];
+      } else if (typeof a[k] === "object" && !a[k].pop) {
+        c[k] = merge(a[k], v);
       } else {
-        c[k] = v
+        c[k] = v;
       }
     } else {
-      c[k] = v
+      c[k] = v;
     }
   }
 
-  return c
+  return c;
 }

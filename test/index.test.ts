@@ -1,382 +1,396 @@
-import 'cross-fetch/polyfill'
-import { createServer } from 'http'
+import "cross-fetch/polyfill";
+import { createServer } from "http";
 
-import { gretch, create } from '../index'
+import { gretch, create } from "../index";
 
 export default (test, assert) => {
-  test('successful request', async () => {
+  test("successful request", async () => {
     const server = createServer((req, res) => {
-      res.end('ha')
-    })
+      res.end("ha");
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).text()
+        const res = await gretch(`http://127.0.0.1:${port}`).text();
 
         if (res.data) {
-          assert.equal(res.data, 'ha')
+          assert.equal(res.data, "ha");
         }
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('retry request', async () => {
-    let i = 0
+  test("retry request", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(500)
-        res.end()
+        res.writeHead(500);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).text()
+        const res = await gretch(`http://127.0.0.1:${port}`).text();
 
         if (res.data) {
-          assert.equal(res.data, 'ha')
+          assert.equal(res.data, "ha");
         }
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('retry fails, returns generic error', async () => {
-    let i = 0
+  test("retry fails, returns generic error", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(500)
-        res.end()
+        res.writeHead(500);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const res = await gretch(`http://127.0.0.1:${port}`, {
           retry: {
-            attempts: 1
-          }
-        }).text()
+            attempts: 1,
+          },
+        }).text();
 
-        assert.equal(res.error.name, 'HTTPError')
+        assert.equal(res.error.name, "HTTPError");
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('request timeout, returns generic error', async () => {
+  test("request timeout, returns generic error", async () => {
     const server = createServer((req, res) => {
       setTimeout(() => {
-        res.end('ha')
-      }, 1000)
-    })
+        res.end("ha");
+      }, 1000);
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const res = await gretch(`http://127.0.0.1:${port}`, {
-          timeout: 500
-        }).text()
+          timeout: 500,
+        }).text();
 
-        assert.equal(res.error.name, 'HTTPTimeout')
+        assert.equal(res.error.name, "HTTPTimeout");
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('json posts', async () => {
+  test("json posts", async () => {
     const server = createServer((req, res) => {
-      const data = []
-      req.on('data', chunk => data.push(chunk))
-      req.on('end', () => {
-        const body = JSON.parse(data[0].toString('utf8'))
-        assert.equal(body.foo, true)
-        res.end(JSON.stringify({ success: true }))
-      })
-    })
+      const data = [];
+      req.on("data", (chunk) => data.push(chunk));
+      req.on("end", () => {
+        const body = JSON.parse(data[0].toString("utf8"));
+        assert.equal(body.foo, true);
+        res.end(JSON.stringify({ success: true }));
+      });
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const res = await gretch<{ success: boolean }>(
           `http://127.0.0.1:${port}`,
           {
-            method: 'POST',
+            method: "POST",
             json: {
-              foo: true
-            }
+              foo: true,
+            },
           }
-        ).json()
+        ).json();
 
-        assert.equal(res.data.success, true)
+        assert.equal(res.data.success, true);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
   test("won't parse 204 status", async () => {
     const server = createServer((req, res) => {
-      const body = { message: 'foo' }
+      const body = { message: "foo" };
       res.writeHead(204, {
-        'Content-Type': 'application/json',
-        'Content-Length': JSON.stringify(body).length
-      })
-      res.end(JSON.stringify(body))
-    })
+        "Content-Type": "application/json",
+        "Content-Length": JSON.stringify(body).length,
+      });
+      res.end(JSON.stringify(body));
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).json()
+        const res = await gretch(`http://127.0.0.1:${port}`).json();
 
-        assert(!res.data)
-        assert(!res.error)
+        assert(!res.data);
+        assert(!res.error);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('returns data as error', async () => {
+  test("returns data as error", async () => {
     const server = createServer((req, res) => {
-      const body = { message: 'foo' }
+      const body = { message: "foo" };
       res.writeHead(400, {
-        'Content-Type': 'application/json',
-        'Content-Length': JSON.stringify(body).length
-      })
-      res.end(JSON.stringify(body))
-    })
+        "Content-Type": "application/json",
+        "Content-Length": JSON.stringify(body).length,
+      });
+      res.end(JSON.stringify(body));
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).json()
+        const res = await gretch(`http://127.0.0.1:${port}`).json();
 
         if (res.error) {
-          assert.equal(res.error.message, 'foo')
+          assert.equal(res.error.message, "foo");
         }
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
   test(`body exists, will fail to parse non-json`, async () => {
     const server = createServer((req, res) => {
       res.writeHead(200, {
-        'Content-Type': 'application/json'
-      })
-      res.end('hey')
-    })
+        "Content-Type": "application/json",
+      });
+      res.end("hey");
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).json()
+        const res = await gretch(`http://127.0.0.1:${port}`).json();
 
-        assert(!!res.error)
+        assert(!!res.error);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
   test(`won't parse body if 204 and json()`, async () => {
     const server = createServer((req, res) => {
       res.writeHead(204, {
-        'Content-Type': 'application/json'
-      })
-      res.end(JSON.stringify({ foo: true }))
-    })
+        "Content-Type": "application/json",
+      });
+      res.end(JSON.stringify({ foo: true }));
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).json()
+        const res = await gretch(`http://127.0.0.1:${port}`).json();
 
-        assert(!res.data)
-        assert(!res.error)
+        assert(!res.data);
+        assert(!res.error);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
   test(`hooks`, async () => {
     const server = createServer((req, res) => {
-      res.writeHead(200)
-      res.end()
-    })
+      res.writeHead(200);
+      res.end();
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        let hooks = 0
+        let hooks = 0;
 
         await gretch(`http://127.0.0.1:${port}`, {
           timeout: 50000,
           hooks: {
-            before (request, opts) {
-              assert(request.url)
-              assert(opts.timeout)
-              hooks++
+            before(request, opts) {
+              assert(request.url);
+              assert(opts.timeout);
+              hooks++;
             },
             after: [
               (response, opts) => {
-                assert(response.status)
-                assert(opts.timeout)
-                hooks++
+                assert(response.status);
+                assert(opts.timeout);
+                hooks++;
               },
               () => {
-                hooks++
-              }
-            ]
-          }
-        }).json()
+                hooks++;
+              },
+            ],
+          },
+        }).json();
 
-        assert(hooks === 3)
+        assert(hooks === 3);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
   test(`create`, async () => {
     const server = createServer((req, res) => {
-      res.writeHead(200)
-      res.end()
-    })
+      res.writeHead(200);
+      res.end();
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const wrappedGretch = create({
           headers: {
-            Foo: 'Bar'
-          }
-        })
+            Foo: "Bar",
+          },
+        });
 
         await wrappedGretch(`http://127.0.0.1:${port}`, {
           hooks: {
-            before (request, opts) {
-              assert.equal(opts.headers.Foo, 'Bar')
-            }
-          }
-        }).json()
+            before(request, opts) {
+              assert.equal(opts.headers.Foo, "Bar");
+            },
+          },
+        }).json();
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
   test(`create with baseURL`, async () => {
     const wrappedGretch = create({
-      baseURL: `http://www.foo.com`
-    })
+      baseURL: `http://www.foo.com`,
+    });
 
-    const res = await wrappedGretch('api').json()
+    const res = await wrappedGretch("api").json();
 
-    assert.equal(res.url, `http://www.foo.com/api`)
-  })
+    assert.equal(res.url, `http://www.foo.com/api`);
+  });
 
   test(`create with baseURL, override per request`, async () => {
     const wrappedGretch = create({
-      baseURL: `http://www.foo.com`
-    })
+      baseURL: `http://www.foo.com`,
+    });
 
-    const res = await wrappedGretch('/api', {
-      baseURL: `http://www.bar.com`
-    }).json()
+    const res = await wrappedGretch("/api", {
+      baseURL: `http://www.bar.com`,
+    }).json();
 
-    assert.equal(res.url, `http://www.bar.com/api`)
-  })
+    assert.equal(res.url, `http://www.bar.com/api`);
+  });
 
   test(`body not parsed with flush`, async () => {
     const server = createServer((req, res) => {
-      const body = { message: 'foo' }
+      const body = { message: "foo" };
       res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Content-Length': JSON.stringify(body).length
-      })
-      res.end(JSON.stringify(body))
-    })
+        "Content-Type": "application/json",
+        "Content-Length": JSON.stringify(body).length,
+      });
+      res.end(JSON.stringify(body));
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const res = await gretch(`http://127.0.0.1:${port}`).flush()
+        const res = await gretch(`http://127.0.0.1:${port}`).flush();
 
-        assert(!!res.url)
-        assert(!!res.status)
-        assert(!!res.response)
+        assert(!!res.url);
+        assert(!!res.status);
+        assert(!!res.response);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        assert(!res.error)
+        assert(!res.error);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        assert(!res.data)
+        assert(!res.data);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
-}
+        r(0);
+      });
+    });
+  });
+};

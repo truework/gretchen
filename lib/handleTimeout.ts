@@ -1,6 +1,6 @@
-import { HTTPTimeout } from './errors'
+import { HTTPTimeout } from "./errors";
 
-export async function handleTimeout (
+export async function handleTimeout(
   request: Promise<Response>,
   ms = 10000,
   controller?: AbortController
@@ -8,15 +8,15 @@ export async function handleTimeout (
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       if (controller) {
-        controller.abort()
+        controller.abort();
       }
 
-      reject(new HTTPTimeout())
-    }, ms)
+      reject(new HTTPTimeout());
+    }, ms);
 
     request
       .then(resolve)
       .catch(reject)
-      .then(() => clearTimeout(timer))
-  })
+      .then(() => clearTimeout(timer));
+  });
 }
