@@ -16,7 +16,7 @@
     "watch": "microbundle watch",
     "test": "node test",
     "lint": "npx eslint .",
-    "format": "npx eslint . && npx prettier --write . && npx prettier --check .",
+    "format": "npx eslint --fix . && npx prettier --write .",
     "prepare": "npx husky install && npx commitizen init cz-conventional-changelog --save-dev --save-exact"
   },
   "keywords": [
