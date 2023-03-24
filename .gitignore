@@ -1,7 +1,8 @@
 dist
 .rpt2_cache/
 .rts2_cache_cjs/
+.rts2_cache_js/
 .rts2_cache_es/
 .rts2_cache_umd/
-.idea
 node_modules
+.idea
