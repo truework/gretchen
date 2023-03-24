@@ -44,16 +44,16 @@ npm i gretchen --save
 With `fetch`, you might do something like this:
 
 ```js
-const request = await fetch('/api/user/12')
-const user = await request.json()
+const request = await fetch("/api/user/12");
+const user = await request.json();
 ```
 
 With `gretchen`, it's very similar:
 
 ```js
-import { gretch } from 'gretchen'
+import { gretch } from "gretchen";
 
-const { data: user } = await gretch('/api/user/12').json()
+const { data: user } = await gretch("/api/user/12").json();
 ```
 
 👉 `gretchen` aims to provide just enough abstraction to provide ease of use
@@ -65,21 +65,21 @@ Using `gretchen` is very similar to using `fetch`. It too defaults to `GET`, and
 sets the `credentials` header to `same-origin`.
 
 ```js
-const request = gretch('/api/user/12')
+const request = gretch("/api/user/12");
 ```
 
 To parse a response body, simply call any of the standard `fetch` [body interface
 methods](https://developer.mozilla.org/en-US/docs/Web/API/Response#Body_Interface_Methods_2):
 
 ```js
-const response = await request.json()
+const response = await request.json();
 ```
 
 The slight diversion from native `fetch` here is to allow users to do this in
 one shot:
 
 ```js
-const response = await gretch('/api/user/12').json()
+const response = await gretch("/api/user/12").json();
 ```
 
 In addition to the _body interface methods_ you're familiar with, there's also a
@@ -88,7 +88,7 @@ errors), which results in slight performance gains. This method returns a
 slightly different response object, see below for more details.
 
 ```js
-const response = await gretch('/api/user/authenticated').flush()
+const response = await gretch("/api/user/authenticated").flush();
 ```
 
 ### Options
@@ -97,36 +97,36 @@ To make different types of requests or edit headers and other request config,
 pass a options object:
 
 ```js
-const response = await gretch('/api/user/12', {
-  credentials: 'include',
+const response = await gretch("/api/user/12", {
+  credentials: "include",
   headers: {
-    'Tracking-ID': 'abcde12345'
-  }
-}).json()
+    "Tracking-ID": "abcde12345",
+  },
+}).json();
 ```
 
 Configuring requests bodies should look familiar as well:
 
 ```js
-const response = await gretch('/api/user/12', {
-  method: 'PATCH',
+const response = await gretch("/api/user/12", {
+  method: "PATCH",
   body: JSON.stringify({
-    name: 'Megan Rapinoe',
-    occupation: 'President of the United States'
-  })
-}).json()
+    name: "Megan Rapinoe",
+    occupation: "President of the United States",
+  }),
+}).json();
 ```
 
 For convenience, there’s also a `json` shorthand. We’ll take care of
 stringifying the body and applying the `Content-Type` header:
 
 ```js
-const response = await gretch('/api/user/12', {
-  method: 'PATCH',
+const response = await gretch("/api/user/12", {
+  method: "PATCH",
   json: {
-    email: 'm.rapinoe@gmail.com'
-  }
-}).json()
+    email: "m.rapinoe@gmail.com",
+  },
+}).json();
 ```
 
 #### Retrying requests
@@ -147,11 +147,11 @@ defaults:
 These options can be set using the configuration object:
 
 ```js
-const response = await gretch('/api/user/12', {
+const response = await gretch("/api/user/12", {
   retry: {
-    attempts: 3
-  }
-}).json()
+    attempts: 3,
+  },
+}).json();
 ```
 
 #### Timeouts
@@ -159,9 +159,9 @@ const response = await gretch('/api/user/12', {
 By default, `gretchen` will time out requests after 10 seconds and retry them, unless otherwise configured. To configure timeout, pass a value in milliseconds:
 
 ```js
-const response = await gretch('/api/user/12', {
-  timeout: 20000
-}).json()
+const response = await gretch("/api/user/12", {
+  timeout: 20000,
+}).json();
 ```
 
 ## Response handling
@@ -172,8 +172,8 @@ typing. More on that later.
 
 ```js
 const { url, status, error, data, response } = await gretch(
-  '/api/user/12'
-).json()
+  "/api/user/12"
+).json();
 ```
 
 `url` and `status` here are what they say they are: properties of the `Response`
@@ -208,8 +208,8 @@ response object.
 
 ```js
 const { url, status, response } = await gretch(
-  '/api/user/authenticated'
-).flush()
+  "/api/user/authenticated"
+).flush();
 ```
 
 ## Hooks
@@ -229,15 +229,15 @@ the request directly, like to add headers. The `before` hook is passed the `Requ
 object, and the full options object.
 
 ```js
-const response = await gretch('/api/user/12', {
+const response = await gretch("/api/user/12", {
   hooks: {
     before: [
       (request, options) => {
-        request.headers.set('Tracking-ID', 'abcde')
-      }
-    ]
-  }
-}).json()
+        request.headers.set("Tracking-ID", "abcde");
+      },
+    ],
+  },
+}).json();
 ```
 
 #### `after`
@@ -247,15 +247,15 @@ have been called. It has the opportunity to read the `gretchen` response. It
 _cannot_ modify it. This is mostly useful for logging.
 
 ```js
-const response = await gretch('/api/user/12', {
+const response = await gretch("/api/user/12", {
   hooks: {
     after: [
       ({ url, status, data, error }, options) => {
-        sentry.captureMessage(`${url} returned ${status}`)
-      }
-    ]
-  }
-}).json()
+        sentry.captureMessage(`${url} returned ${status}`);
+      },
+    ],
+  },
+}).json();
 ```
 
 ## Creating instances
@@ -265,20 +265,20 @@ options. This is useful if you want to attach something like logging to every
 request made with the returned instance.
 
 ```js
-import { create } from 'gretchen'
+import { create } from "gretchen";
 
 const gretch = create({
   headers: {
-    'X-Powered-By': 'gretchen'
+    "X-Powered-By": "gretchen",
   },
   hooks: {
-    after ({ error }) {
-      if (error) sentry.captureException(error)
-    }
-  }
-})
+    after({ error }) {
+      if (error) sentry.captureException(error);
+    },
+  },
+});
 
-await gretch('/api/user/12').json()
+await gretch("/api/user/12").json();
 ```
 
 ### Base URLs
@@ -295,22 +295,22 @@ Functionally, this:
 
 ```js
 const gretch = create({
-  baseURL: 'https://www.mysite.com/api'
-})
+  baseURL: "https://www.mysite.com/api",
+});
 ```
 
 Is equivalent to this:
 
 ```js
 const gretch = create({
-  baseURL: '/api'
-})
+  baseURL: "/api",
+});
 ```
 
 So this request:
 
 ```js
-await gretch('/user/12').json()
+await gretch("/user/12").json();
 ```
 
 Will resolve to `https://www.mysite.com/api/user/12`.
@@ -329,16 +329,16 @@ To do so, pass your data types directly to the `gretch` call:
 
 ```typescript
 type Success = {
-  name: string
-  occupation: string
-}
+  name: string;
+  occupation: string;
+};
 
 type Error = {
-  code: number
-  errors: string[]
-}
+  code: number;
+  errors: string[];
+};
 
-const response = await gretch<Success, Error>('/api/user/12').json()
+const response = await gretch<Success, Error>("/api/user/12").json();
 ```
 
 Then, you can safely use the responses:
@@ -347,13 +347,13 @@ Then, you can safely use the responses:
 if (response.error) {
   const {
     code, // number
-    errors // array of strings
-  } = response.error // typeof Error
+    errors, // array of strings
+  } = response.error; // typeof Error
 } else if (response.data) {
   const {
     name, // string
-    occupation // string
-  } = response.data // typeof Success
+    occupation, // string
+  } = response.data; // typeof Success
 }
 ```
 

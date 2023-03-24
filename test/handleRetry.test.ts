@@ -1,236 +1,243 @@
-import 'cross-fetch/polyfill'
-import { createServer } from 'http'
+import "cross-fetch/polyfill";
+import { createServer } from "http";
 
-import { handleRetry } from '../lib/handleRetry'
-import { handleTimeout } from '../lib/handleTimeout'
+import { handleRetry } from "../lib/handleRetry";
+import { handleTimeout } from "../lib/handleTimeout";
 
 export default (test, assert) => {
-  test('works', async () => {
-    let i = 0
+  test("works", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(500)
-        res.end()
+        res.writeHead(500);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const raw = await handleRetry(
           () => fetch(`http://127.0.0.1:${port}`),
-          'GET',
+          "GET",
           {}
-        )
-        const res = await raw.text()
+        );
+        const res = await raw.text();
 
-        assert.equal(res, 'ha')
+        assert.equal(res, "ha");
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('retries fail', async () => {
-    let i = 0
+  test("retries fail", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(500)
-        res.end()
+        res.writeHead(500);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const raw = await handleRetry(
           () => fetch(`http://127.0.0.1:${port}`),
-          'GET',
+          "GET",
           { attempts: 1 }
-        )
-        assert.equal(raw.status, 500)
+        );
+        assert.equal(raw.status, 500);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('respect 0 retries config', async () => {
-    let i = 0
+  test("respect 0 retries config", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(500)
-        res.end()
+        res.writeHead(500);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const raw = await handleRetry(
           () => fetch(`http://127.0.0.1:${port}`),
-          'GET',
+          "GET",
           { attempts: 0 }
-        )
-        assert.equal(raw.status, 500)
-        assert.equal(i, 1)
+        );
+        assert.equal(raw.status, 500);
+        assert.equal(i, 1);
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('retries for specified status codes', async () => {
-    let i = 0
+  test("retries for specified status codes", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(400)
-        res.end()
+        res.writeHead(400);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const raw = await handleRetry(
           () => fetch(`http://127.0.0.1:${port}`),
-          'GET',
+          "GET",
           { codes: [400] }
-        )
-        const res = await raw.text()
+        );
+        const res = await raw.text();
 
-        assert.equal(res, 'ha')
+        assert.equal(res, "ha");
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('retries for specified methods', async () => {
-    let i = 0
+  test("retries for specified methods", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
-        res.writeHead(500)
-        res.end()
+        res.writeHead(500);
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const raw = await handleRetry(
           () => fetch(`http://127.0.0.1:${port}`),
-          'POST',
-          { methods: ['POST'] }
-        )
-        const res = await raw.text()
+          "POST",
+          { methods: ["POST"] }
+        );
+        const res = await raw.text();
 
-        assert.equal(res, 'ha')
+        assert.equal(res, "ha");
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('works with timeout', async () => {
+  test("works with timeout", async () => {
     const server = createServer((req, res) => {
       setTimeout(() => {
-        res.end('ha')
-      }, 1000)
-    })
+        res.end("ha");
+      }, 1000);
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
         const request = () =>
-          handleTimeout(fetch(`http://127.0.0.1:${port}`), 500)
+          handleTimeout(fetch(`http://127.0.0.1:${port}`), 500);
 
         try {
-          await handleRetry(request, 'GET', {})
+          await handleRetry(request, "GET", {});
         } catch (e) {
-          assert.equal(e.name, 'HTTPTimeout')
+          assert.equal(e.name, "HTTPTimeout");
         }
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
+        r(0);
+      });
+    });
+  });
 
-  test('respects Retry-After header', async () => {
-    let i = 0
+  test("respects Retry-After header", async () => {
+    let i = 0;
     const server = createServer((req, res) => {
       if (i++ < 2) {
         res.writeHead(500, {
-          'Retry-After': 1
-        })
-        res.end()
+          "Retry-After": 1,
+        });
+        res.end();
       } else {
-        res.end('ha')
+        res.end("ha");
       }
-    })
+    });
 
-    await new Promise(r => {
+    await new Promise((r) => {
       server.listen(async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { port } = server.address()
+        const { port } = server.address();
 
-        const then = Date.now()
+        const then = Date.now();
 
         const raw = await handleRetry(
           () => fetch(`http://127.0.0.1:${port}`),
-          'GET',
+          "GET",
           {}
-        )
+        );
 
-        const now = Date.now()
+        const now = Date.now();
 
         // retried too fast
         if (now - then < 1000) {
-          throw Error('fail')
+          throw Error("fail");
         }
 
-        const res = await raw.text()
+        const res = await raw.text();
 
-        assert.equal(res, 'ha')
+        assert.equal(res, "ha");
 
-        server.close()
+        server.close();
 
-        r(0)
-      })
-    })
-  })
-}
+        r(0);
+      });
+    });
+  });
+};

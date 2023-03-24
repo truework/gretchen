@@ -1,3 +1,4 @@
+*.d.ts
 dist
 .rpt2_cache/
 .rts2_cache_cjs/
@@ -6,3 +7,4 @@ dist
 .rts2_cache_umd/
 node_modules
 .idea
+
