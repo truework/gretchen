@@ -362,14 +362,14 @@ test(`create with baseURL`, async t => {
 
 test(`create with baseURL, override per request`, async t => {
   const wrappedGretch = create({
-    baseURL: `http://www.foo.com`
+    baseURL: `http://www.example.com`
   });
 
   const res = await wrappedGretch("/api", {
-    baseURL: `http://www.bar.com`
+    baseURL: `http://www.example.net`
   }).json();
 
-  t.is(res.url, `http://www.bar.com/api`);
+  t.is(res.url, `http://www.example.net/api`);
 });
 
 test(`body not parsed with flush`, async t => {
