@@ -64,6 +64,7 @@
     "eslint-config-prettier": "^8.7.0",
     "husky": "^6.0.0",
     "is-ci": "^3.0.1",
+    "lint-staged": "^13.2.3",
     "microbundle": "^0.13.3",
     "prettier": "2.8.4",
     "semantic-release": "^18.0.1",

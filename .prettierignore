@@ -7,3 +7,6 @@ dist
 node_modules
 node_modules/*
 .idea
+.husky
+.prettierignore
+.gitignore
