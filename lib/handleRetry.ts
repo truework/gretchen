@@ -1,10 +1,10 @@
 import { HTTPTimeout } from "./errors";
 
 export type RetryOptions = {
-  attempts?: number;
-  codes?: number[];
-  methods?: string[];
-  delay?: number;
+  attempts: number;
+  codes: number[];
+  methods: string[];
+  delay: number;
 };
 
 export const defaultRetryOptions: RetryOptions = {

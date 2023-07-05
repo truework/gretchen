@@ -84,7 +84,7 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
     ...(rest as RequestInit),
   };
   const controller =
-    typeof AbortController !== "undefined" ? new AbortController() : null;
+    typeof AbortController !== "undefined" ? new AbortController() : undefined;
 
   if (controller) {
     options.signal = controller.signal;
@@ -104,7 +104,9 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
   const request = new Request(normalizedURL, options);
 
   if (hooks.before)
-    [].concat(hooks.before).forEach((hook) => hook(request, opts));
+    ([] as GretchBeforeHook[])
+      .concat(hooks.before)
+      .forEach((hook) => hook(request, opts));
 
   const fetcher = () =>
     timeout
@@ -160,7 +162,9 @@ export function gretch<T = DefaultGretchResponse, A = DefaultGretchError>(
       };
 
       if (hooks.after)
-        [].concat(hooks.after).forEach((hook) => hook({ ...res }, opts));
+        ([] as GretchAfterHook[])
+          .concat(hooks.after)
+          .forEach((hook) => hook({ ...res }, opts));
 
       return res;
     };
